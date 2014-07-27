@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="col-lg-6">
+  {% for entry in entries %}
+  <ul class="list-group">
+    <li class="list-group-item">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+        <h2>{{ entry.title }}</h2>
+        </div>
+        <div class="panel-body">
+            <h3>Ingredients:</h3>{{ entry.ingredients|nl2br }}
+            <h3>Steps:</h3>{{ entry.steps|nl2br }}
+            <h3>Tags:</h3>{{ entry.tags }}
+            <h3>URL:</h3>{{ entry.url }}
+        </div>
+    </div>
+    </li>
+    </ul>
+  {% else %}
+    <div class="alert alert-danger">Recipe #{{ entry.id }} does not exist.</div>
+  {% endfor %}
+  </div>
+{% endblock %}

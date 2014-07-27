@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block body %}
+  <div class="col-lg">
+  <table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Recipe Name</th>
+            <th>Actions</th><th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entry in entries %}
+        <tr>
+            <td><a href="/view/{{ entry.id }}">{{ entry.id }}</a></td>
+            <td><a href="/view/{{ entry.id }}">{{ entry.title }}</a></td>
+            <td>
+                {% if session.logged_in %}
+                    <a href="/edit/{{ entry.id }}">Edit</a></td>
+                {% endif %}
+            <td>{% if session.logged_in %}
+                <a href="/delete/{{ entry.id }}">Delete</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+  </div>
+{% endblock %}

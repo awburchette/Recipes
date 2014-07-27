@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block body %}
+    <div class="container">
+    <h2 class="page-header">Search Recipes</h2>
+        <div class="container col-md-6">
+            <form action="{{ url_for('search') }}" method=post>
+                <input type=text name=search_query  size="30" class="form-control"><p></p>
+                <input type=submit class="btn btn-primary" value=Search>
+            </form>
+        </div>
+    </div>
+    <div class="container">
+    <h2 class="page-header">Tags</h2>
+        {% for entry in entries %}
+        <a href="/search/{{ entry[0] }}">{{ entry[0] }}</a>
+        {% endfor %}
+    </div>
+{% endblock %}

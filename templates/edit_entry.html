@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block body %}
+  {% if session.logged_in %}
+    <div class="container">
+    <h2 class="page-header">Edit Recipe</h2>
+    <form action="{{ url_for('edit_entry', id=entries[0].id) }}" method=post class=edit-entry>
+      <dl>
+        <dt class="control-label">Title:</dt>
+        <dd><input type=text size=30 name=title value="{{ entries[0].title }}" class="form-control"><p></p></dd>
+        <dt>Ingredients:</dt>
+        <dd><textarea name=ingredients rows=10 cols=40 class="form-control">{{ entries[0].ingredients }}</textarea><p></p></dd>
+        <dt>Steps:</dt>
+        <dd><textarea name=steps rows=10 cols=40 class="form-control">{{ entries[0].steps }}</textarea><p></p></dd>
+        <dt class="control-label">Tags (space separated):</dt>
+        <dd><input type=text size=30 name=tags value="{{ entries[0].tags }}" class="form-control"><p></p></dd>
+        <dt class="control-label">URL:</dt>
+        <dd><input type=text size=30 name=url value="{{ entries[0].url }}" class="form-control"><p></p></dd>
+        <dd><input type=hidden value="{{ entries[0].id }}" name=id><input type=submit value=Save class="btn btn-primary"></dd>
+      </dl>
+    </form>
+  {% else %}
+    <div class="alert alert-danger">You need to login to edit a recipe!</div>
+  {% endif %}
+{% endblock %}
