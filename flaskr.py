@@ -3,6 +3,7 @@ import os
 import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
      render_template, flash
+from werkzeug.utils import secure_filename
 import re
 
 from jinja2 import evalcontextfilter, Markup, escape
@@ -13,13 +14,17 @@ _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
 app = Flask(__name__)
 app.config.from_object(__name__)
 
+UPLOAD_FOLDER = './static/images'
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
 # Load default config and override config from an environment variable
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'recipes.db'),
     DEBUG=True,
     SECRET_KEY='development key',
     USERNAME='admin',
-    PASSWORD='default'
+    PASSWORD='default',
+    UPLOAD_FOLDER=UPLOAD_FOLDER
 ))
 app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 
@@ -56,6 +61,11 @@ def init_db():
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
+
+        
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 @app.route('/')
