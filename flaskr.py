@@ -10,6 +10,8 @@ from jinja2 import evalcontextfilter, Markup, escape
 
 _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
 
+# pagination idea: http://flask.pocoo.org/snippets/44/
+
 # create our little application :)
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -83,11 +85,11 @@ def add_entry():
 
     if request.method == 'POST':
         db = get_db()
-        db.execute('insert into entries (title, ingredients, steps, tags, url) values (?, ?, ?, ?, ?)', \
+        cur = db.execute('insert into entries (title, ingredients, steps, tags, url) values (?, ?, ?, ?, ?)', \
                      [request.form['title'], request.form['ingredients'], request.form['steps'], request.form['tags'], request.form['url']])
         db.commit()
         flash('New entry was successfully posted','success')
-        return redirect(url_for('show_entries'))
+        return view_entry(str(cur.lastrowid))
     else:
         return render_template('add_entry.html')
 
@@ -115,7 +117,7 @@ def edit_entry(id):
                     [request.form['title'], request.form['ingredients'], request.form['steps'], request.form['tags'], request.form['url'], request.form['id']])
         db.commit()
         flash('Entry ' + id + ' has been modified.','success')
-        return redirect(url_for('show_entries'))
+        return view_entry(str(id))
     else:
         db = get_db()
         cur = db.execute('select id, title, ingredients, steps, tags, url from entries where id = ? order by id desc', [id.strip()])
