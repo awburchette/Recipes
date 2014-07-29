@@ -6,7 +6,7 @@
     <li class="list-group-item">
     <div class="panel panel-primary">
         <div class="panel-heading">
-        <h2>{{ entry.title }}</h2><a href="/edit/{{ entry.id }}" class="btn btn-sm btn-primary">Edit</a>
+        <h2>{{ entry.title }}</h2>{% if session.logged_in %}<a href="/edit/{{ entry.id }}" class="btn btn-sm btn-primary">Edit</a>{% endif %}
         </div>
         <div class="panel-body">
             <h3>Ingredients:</h3>{{ entry.ingredients|nl2br }}

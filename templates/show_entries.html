@@ -4,7 +4,7 @@
   <table class="table table-striped">
     <thead>
         <tr>
-            <th>#</th>
+            <!--<th>#</th>-->
             <th>Recipe Name</th>
             <th>Actions</th><th></th>
         </tr>
@@ -12,14 +12,16 @@
     <tbody>
         {% for entry in entries %}
         <tr>
-            <td><a href="/view/{{ entry.id }}">{{ entry.id }}</a></td>
+            <!--<td><a href="/view/{{ entry.id }}">{{ entry.id }}</a></td>-->
             <td><a href="/view/{{ entry.id }}">{{ entry.title }}</a></td>
             <td>
                 {% if session.logged_in %}
-                    <a href="/edit/{{ entry.id }}">Edit</a></td>
+                <a href="/edit/{{ entry.id }}"><button type="input" class="btn btn-xs btn-primary">Edit</button></a>
                 {% endif %}
-            <td>{% if session.logged_in %}
-                <a href="/delete/{{ entry.id }}">Delete</a>
+            </td>
+            <td>
+                {% if session.logged_in %}
+                <a href="/delete/{{ entry.id }}"><button type="input" class="btn btn-xs btn-primary">Delete</button></a>
                 {% endif %}
             </td>
         </tr>

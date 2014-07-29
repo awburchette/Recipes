@@ -172,6 +172,8 @@ def search(tag=None):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+    if session.get('logged_in'):
+        return redirect(url_for('show_entries'))
     if request.method == 'POST':
         if request.form['username'] != app.config['USERNAME']:
             error = 'Invalid username'
