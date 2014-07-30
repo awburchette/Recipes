@@ -2,7 +2,7 @@
 import os
 import sqlite3
 from flask import Flask, request, session, g, redirect, url_for, abort, \
-     render_template, flash
+    render_template, flash
 from werkzeug.utils import secure_filename
 import re
 
@@ -34,8 +34,9 @@ app.config.from_envvar('FLASKR_SETTINGS', silent=True)
 @app.template_filter()
 @evalcontextfilter
 def nl2br(eval_ctx, value):
-    result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n') \
-        for p in _paragraph_re.split(escape(value)))
+    """Converts newlines to <br> tags."""
+    result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n')
+                          for p in _paragraph_re.split(escape(value)))
     if eval_ctx.autoescape:
         result = Markup(result)
     return result
@@ -43,12 +44,11 @@ def nl2br(eval_ctx, value):
 
 def get_db():
     """Opens a new database connection if there is none yet for the
-    current application context.
-    """
+    current application context."""
     if not hasattr(g, 'sqlite_db'):
         g.sqlite_db = connect_db()
     return g.sqlite_db
-    
+
 
 def connect_db():
     """Connects to the specific database."""
@@ -58,37 +58,46 @@ def connect_db():
 
 
 def init_db():
+    """Initialize the database if it does not exist."""
     with app.app_context():
         db = get_db()
         with app.open_resource('schema.sql', mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
 
-        
+
 def allowed_file(filename):
+    """Is the file's extension listed in ALLOWED_EXTENSIONS."""
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
 
 
 @app.route('/')
 def show_entries():
+    """Lists all of the recipes."""
     db = get_db()
-    cur = db.execute('select id, title, ingredients, steps, tags, url from entries order by id asc')
+    cur = db.execute('select id, title, ingredients, steps, tags, \
+                      url from entries order by id asc')
     entries = cur.fetchall()
     return render_template('show_entries.html', entries=entries)
 
 
 @app.route('/add', methods=['GET', 'POST'])
 def add_entry():
+    """Add a recipe if the user is logged in."""
     if not session.get('logged_in'):
         abort(401)
 
     if request.method == 'POST':
         db = get_db()
-        cur = db.execute('insert into entries (title, ingredients, steps, tags, url) values (?, ?, ?, ?, ?)', \
-                     [request.form['title'], request.form['ingredients'], request.form['steps'], request.form['tags'], request.form['url']])
+        cur = db.execute('insert into entries (title, ingredients, steps, \
+                          tags, url) values (?, ?, ?, ?, ?)',
+                         [request.form['title'], request.form['ingredients'],
+                          request.form['steps'], request.form['tags'],
+                          request.form['url']])
         db.commit()
-        flash('New entry was successfully posted','success')
+        flash('Recipe, ' + escape(request.form['title'])
+              + ', was successfully added', 'success')
         return view_entry(str(cur.lastrowid))
     else:
         return render_template('add_entry.html')
@@ -96,45 +105,62 @@ def add_entry():
 
 @app.route('/delete/<id>')
 def delete_entry(id):
+    """Delete a recipe if the user is logged in."""
     if not session.get('logged_in'):
         abort(401)
 
     db = get_db()
+    cur = db.execute('select id, title from entries where id = ?',
+                     [id.strip()])
+    entries = cur.fetchall()
+    title = entries[0]['title']
+    db = get_db()
     db.execute('delete from entries where id = ?', [id.strip()])
     db.commit()
-    flash('Entry ' + id + ' has been deleted','success')
+    flash('Recipe, ' + escape(title) + ', has been deleted', 'success')
     return redirect(url_for('show_entries'))
 
 
 @app.route('/edit/<id>', methods=['GET', 'POST'])
 def edit_entry(id):
+    """Edit the selected recipe."""
     if not session.get('logged_in'):
         abort(401)
 
     if request.method == 'POST':
         db = get_db()
-        db.execute('update entries set title = ?, ingredients = ?, steps = ?, tags = ?, url = ? where id = ?', \
-                    [request.form['title'], request.form['ingredients'], request.form['steps'], request.form['tags'], request.form['url'], request.form['id']])
+        db.execute('update entries set title = ?, ingredients = ?, \
+                    steps = ?, tags = ?, url = ? where id = ?',
+                   [request.form['title'], request.form['ingredients'],
+                    request.form['steps'], request.form['tags'],
+                    request.form['url'], request.form['id']])
         db.commit()
-        flash('Entry ' + id + ' has been modified.','success')
+        flash('Entry ' + id + ' has been modified.', 'success')
         return view_entry(str(id))
     else:
         db = get_db()
-        cur = db.execute('select id, title, ingredients, steps, tags, url from entries where id = ? order by id desc', [id.strip()])
+        cur = db.execute('select id, title, ingredients, steps, tags, \
+                          url from entries where id = ? order by id desc',
+                         [id.strip()])
         entries = cur.fetchall()
         return render_template('edit_entry.html', entries=entries)
 
 
 @app.route('/view/<id>')
 def view_entry(id):
+    """View the selected recipe."""
     db = get_db()
-    cur = db.execute('select id, title, ingredients, steps, tags, url from entries where id = ? order by id desc', [id.strip()])
+    cur = db.execute('select id, title, ingredients, steps, tags, url \
+                      from entries where id = ? order by id desc',
+                     [id.strip()])
     entries = cur.fetchall()
     return render_template('view_entry.html', entries=entries)
+
 
 @app.route('/search/<tag>', methods=['GET'])
 @app.route('/search', methods=['GET', 'POST'])
 def search(tag=None):
+    """Search for recipes."""
     db = get_db()
     if request.method == 'GET' and not tag:
         cur = db.execute('select tags from entries')
@@ -148,43 +174,51 @@ def search(tag=None):
             tags.append((i,))
         tags.sort()
         return render_template('search.html', entries=tags)
-    
+
     if not tag:
         search = request.form['search_query']
     else:
         search = tag
-        
-    query = 'select id, title, ingredients, steps, tags, url from entries where'
+
+    query = 'select id, title, ingredients, steps, tags, \
+             url from entries where'
     for t in search.split(' '):
-        query += """ (tags like ('%' || ? || '%') or title like ('%' || ? || '%') or ingredients like ('%' || ? || '%')) AND """
+        query += """ (tags like ('%' || ? || '%') or title like
+                     ('%' || ? || '%') or ingredients like ('%' || ? || '%'))
+                     AND """
     requests = search.split(' ')*3
     requests.sort()
     query = query[:-4] + 'order by id asc'
     if search:
         cur = db.execute(query, requests)
     else:
-        cur = db.execute('select id, title, ingredients, steps, tags, url from entries order by id asc')
+        cur = db.execute('select id, title, ingredients, steps, tags, \
+                          url from entries order by id asc')
     entries = cur.fetchall()
     return render_template('show_entries.html', entries=entries)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """Log the user into the application."""
     if request.method == 'POST' and not session.get('logged_in'):
         db = get_db()
-        cur = db.execute('select id, username, password from users where username = ? and password = ?', [request.form['username'], request.form['password']])
+        cur = db.execute('select id, username, password from users where \
+                          username = ? and password = ?',
+                         [request.form['username'], request.form['password']])
         rows = cur.fetchall()
         if len(rows) == 1:
             session['logged_in'] = True
         else:
-            flash('Invalid username or password','error')
+            flash('Invalid username or password', 'error')
     return redirect(url_for('show_entries'))
 
 
 @app.route('/logout')
 def logout():
+    """Log the user out of the application."""
     session.pop('logged_in', None)
-    flash('You were logged out','success')
+    flash('You were logged out', 'success')
     return redirect(url_for('show_entries'))
 
 
@@ -196,4 +230,5 @@ def close_db(error):
 
 
 if __name__ == '__main__':
+    """Launch the application."""
     app.run(host='0.0.0.0', port=8080)
