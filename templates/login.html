@@ -1,7 +1,9 @@
 {% extends "layout.html" %}
 {% block body %}
   <div class="container col-md-4">
-  {% if error %}<p class="alert alert-danger"><strong>Error:</strong> {{ error }}{% endif %}
+  {% if error %}
+    <p class="alert alert-danger"><strong>Error:</strong> {{ error }}
+  {% endif %}
   <h2 class="page-header">Login</h2>
   <form action="{{ url_for('login') }}" method=post>
     <dl>
