@@ -41,7 +41,14 @@
                         </li>
                     </ul>
                     {% if not session.logged_in %}
-                    <form class="navbar-form navbar-right" role="form" action="{{ url_for('login') }}" method=post>
+                    <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/sha512.js"></script>
+                    <script>
+                        function hashpass()
+                        {
+                            document.forms["login-form"]["password"].value = CryptoJS.SHA512(document.forms["login-form"]["password"].value);
+                        }
+                    </script>
+                    <form class="navbar-form navbar-right" role="form" action="{{ url_for('login') }}" method=post name="login-form" onsubmit="hashpass();">
                         <div class="form-group">
                           <input type="text" placeholder="Username" name="username" class="form-control">
                         </div>
@@ -65,7 +72,7 @@
                 success
                 {% endif %}
                 {%- if message[0] == 'error' -%}
-                error
+                danger
                 {% endif %}
                 ">{{ message[1] }}</div>
             {% endfor %}

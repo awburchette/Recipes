@@ -127,7 +127,6 @@ def edit_entry(id):
 
 @app.route('/view/<id>')
 def view_entry(id):
-    print 'ID:',id
     db = get_db()
     cur = db.execute('select id, title, ingredients, steps, tags, url from entries where id = ? order by id desc', [id.strip()])
     entries = cur.fetchall()
@@ -171,18 +170,15 @@ def search(tag=None):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
-    if session.get('logged_in'):
-        return redirect(url_for('show_entries'))
-    if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
-            error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
-            error = 'Invalid password'
-        else:
+    if request.method == 'POST' and not session.get('logged_in'):
+        db = get_db()
+        cur = db.execute('select id, username, password from users where username = ? and password = ?', [request.form['username'], request.form['password']])
+        rows = cur.fetchall()
+        if len(rows) == 1:
             session['logged_in'] = True
-            return redirect(url_for('show_entries'))
-    return render_template('login.html', error=error)
+        else:
+            flash('Invalid username or password','error')
+    return redirect(url_for('show_entries'))
 
 
 @app.route('/logout')

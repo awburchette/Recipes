@@ -7,3 +7,10 @@ create table entries (
   tags text,
   url text
 );
+
+drop table if exists users;
+create table entries (
+  id integer primary key autoincrement,
+  username text not null,
+  password text not null,
+);
